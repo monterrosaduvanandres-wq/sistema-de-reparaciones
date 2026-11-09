@@ -1,5 +1,6 @@
 package com.reparaciones.sistema.entity;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -35,16 +36,20 @@ public class Reparacion {
     @JoinColumn(name = "id_tecnico")
     private Tecnico tecnico;
 
+    @JsonBackReference("celular-reparaciones")
     @ManyToOne
     @JoinColumn(name = "id_celular")
     private Celular celular;
 
+    @JsonManagedReference("reparacion-seguimientos")
     @OneToMany(mappedBy = "reparacion")
     private List<SeguimientoReparacion> seguimientos;
 
+    @JsonManagedReference("reparacion-detalles")
     @OneToMany(mappedBy = "reparacion")
     private List<DetalleReparacion> detalles;
 
+    @JsonManagedReference("reparacion-pagos")
     @OneToMany(mappedBy = "reparacion")
     private List<Pago> pagos;
 

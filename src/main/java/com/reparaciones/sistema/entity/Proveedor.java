@@ -1,5 +1,5 @@
 package com.reparaciones.sistema.entity;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -24,6 +24,7 @@ public class Proveedor {
     @Column(name = "correo")
     private String correo;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "proveedor")
     private List<Repuesto> repuestos;
 

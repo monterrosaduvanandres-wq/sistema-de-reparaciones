@@ -1,5 +1,5 @@
 package com.reparaciones.sistema.entity;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class Celular {
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Cliente cliente;
-
+@JsonManagedReference("celular-reparaciones")
     @OneToMany(mappedBy = "celular")
     private List<Reparacion> reparaciones;
 

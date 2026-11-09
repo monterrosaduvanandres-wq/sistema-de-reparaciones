@@ -1,5 +1,5 @@
 package com.reparaciones.sistema.entity;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
@@ -21,10 +21,12 @@ public class DetalleReparacion {
     @Column(name = "sub_total")
     private BigDecimal subTotal;
 
+    @JsonBackReference("reparacion-detalles")
     @ManyToOne
     @JoinColumn(name = "id_reparacion")
     private Reparacion reparacion;
 
+    @JsonBackReference("repuesto-detalles")
     @ManyToOne
     @JoinColumn(name = "id_repuesto")
     private Repuesto repuesto;

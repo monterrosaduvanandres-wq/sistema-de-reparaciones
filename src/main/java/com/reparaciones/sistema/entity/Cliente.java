@@ -30,6 +30,7 @@ public class Cliente {
 
     @Column(name = "fecha_registro")
     private LocalDate fechaRegistro;
+    
     @JsonIgnore
     @OneToMany(mappedBy = "cliente")
     private List<Celular> celulares;

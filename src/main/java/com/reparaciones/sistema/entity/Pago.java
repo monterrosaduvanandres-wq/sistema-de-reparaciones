@@ -1,5 +1,5 @@
 package com.reparaciones.sistema.entity;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +25,7 @@ public class Pago {
     @Column(name = "estado_pago")
     private String estadoPago;
 
+    @JsonBackReference("reparacion-pagos")
     @ManyToOne
     @JoinColumn(name = "id_reparacion")
     private Reparacion reparacion;

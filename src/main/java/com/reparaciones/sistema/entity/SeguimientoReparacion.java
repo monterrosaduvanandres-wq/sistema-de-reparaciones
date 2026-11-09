@@ -1,5 +1,5 @@
 package com.reparaciones.sistema.entity;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -20,7 +20,8 @@ public class SeguimientoReparacion {
 
     @Column(name = "observacion")
     private String observacion;
-
+    
+    @JsonBackReference("reparacion-seguimientos")
     @ManyToOne
     @JoinColumn(name = "id_reparacion")
     private Reparacion reparacion;

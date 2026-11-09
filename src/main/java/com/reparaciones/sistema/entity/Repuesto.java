@@ -1,5 +1,5 @@
 package com.reparaciones.sistema.entity;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,6 +29,7 @@ public class Repuesto {
     @JoinColumn(name = "id_proveedor")
     private Proveedor proveedor;
 
+    @JsonManagedReference("repuesto-detalles")
     @OneToMany(mappedBy = "repuesto")
     private List<DetalleReparacion> detalles;
 
