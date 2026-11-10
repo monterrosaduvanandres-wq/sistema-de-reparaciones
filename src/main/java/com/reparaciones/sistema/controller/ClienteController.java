@@ -3,13 +3,16 @@ package com.reparaciones.sistema.controller;
 
 import com.reparaciones.sistema.entity.Cliente;
 import com.reparaciones.sistema.service.ClienteService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
+
     private final ClienteService service;
 
     public ClienteController(ClienteService service) {
@@ -29,17 +32,21 @@ public class ClienteController {
     }
 
     @PostMapping
-    public Cliente crear(@RequestBody Cliente cliente) {
+    public Cliente crear(@Valid @RequestBody Cliente cliente) {
         return service.guardar(cliente);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Cliente> actualizar(
-            @PathVariable Long id, @RequestBody Cliente cliente) {
+            @PathVariable Long id,
+            @Valid @RequestBody Cliente cliente) {
+
         if (service.buscarPorId(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
         cliente.setIdCliente(id);
+
         return ResponseEntity.ok(service.guardar(cliente));
     }
 
@@ -48,7 +55,9 @@ public class ClienteController {
         if (service.buscarPorId(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
         service.eliminar(id);
+
         return ResponseEntity.noContent().build();
     }
 }

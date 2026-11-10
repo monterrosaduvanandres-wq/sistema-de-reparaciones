@@ -1,6 +1,9 @@
+
 package com.reparaciones.sistema.entity;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -13,18 +16,27 @@ public class Repuesto {
     @Column(name = "id_repuesto")
     private Long idRepuesto;
 
+    @NotBlank(message = "El nombre del repuesto es obligatorio")
+    @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
     @Column(name = "nombre")
     private String nombre;
 
+    @Size(max = 255, message = "La descripción no puede superar los 255 caracteres")
     @Column(name = "descripcion")
     private String descripcion;
 
-    @Column(name = "precio")
+    @NotNull(message = "El precio es obligatorio")
+    @DecimalMin(value = "0.01", message = "El precio debe ser mayor que cero")
+    @Digits(integer = 10, fraction = 2, message = "El precio admite hasta 10 enteros y 2 decimales")
+    @Column(name = "precio", precision = 12, scale = 2)
     private BigDecimal precio;
 
+    @NotNull(message = "El stock es obligatorio")
+    @PositiveOrZero(message = "El stock no puede ser negativo")
     @Column(name = "stock")
     private Integer stock;
 
+    @NotNull(message = "Debe seleccionar un proveedor")
     @ManyToOne
     @JoinColumn(name = "id_proveedor")
     private Proveedor proveedor;
