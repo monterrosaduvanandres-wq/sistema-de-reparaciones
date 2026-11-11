@@ -4,8 +4,9 @@ package com.reparaciones.sistema.service;
 import com.reparaciones.sistema.entity.Cliente;
 import com.reparaciones.sistema.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,9 +18,9 @@ public class ClienteService {
         this.repository = repository;
     }
 
-    public List<Cliente> listar() {
-        return repository.findAll();
-    }
+    public Page<Cliente> listar(Pageable pageable) {
+    return repository.findAll(pageable);
+}
 
     public Optional<Cliente> buscarPorId(Long id) {
         return repository.findById(id);

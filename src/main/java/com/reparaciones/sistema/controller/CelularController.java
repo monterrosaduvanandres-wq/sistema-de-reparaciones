@@ -1,12 +1,15 @@
 package com.reparaciones.sistema.controller;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import com.reparaciones.sistema.entity.Celular;
 import com.reparaciones.sistema.service.CelularService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/celulares")
@@ -19,9 +22,15 @@ public class CelularController {
     }
 
     @GetMapping
-    public List<Celular> listar() {
-        return service.listar();
-    }
+public Page<Celular> listar(
+        @PageableDefault(
+                size = 5,
+                sort = "idCelular",
+                direction = Sort.Direction.DESC
+        ) Pageable pageable) {
+
+    return service.listar(pageable);
+}
 
     @GetMapping("/{id}")
     public ResponseEntity<Celular> buscar(@PathVariable Long id) {

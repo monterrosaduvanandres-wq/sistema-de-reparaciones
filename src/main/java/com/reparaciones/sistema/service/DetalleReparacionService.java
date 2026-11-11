@@ -13,10 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
+
 import java.util.Optional;
 
 @Service
@@ -36,9 +37,9 @@ public class DetalleReparacionService {
         this.repuestoRepository = repuestoRepository;
     }
 
-    public List<DetalleReparacion> listar() {
-        return repository.findAll();
-    }
+   public Page<DetalleReparacion> listar(Pageable pageable) {
+    return repository.findAll(pageable);
+}
 
     public Optional<DetalleReparacion> buscarPorId(Long id) {
         return repository.findById(id);
@@ -58,7 +59,7 @@ public class DetalleReparacionService {
                 detalle.getReparacion().getIdReparacion() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Debe seleccionar una reparación"
+                    "Debe seleccionar una reparacion"
             );
         }
 
@@ -70,27 +71,31 @@ public class DetalleReparacionService {
             );
         }
 
-        Long idReparacion = detalle.getReparacion().getIdReparacion();
-        Long idRepuesto = detalle.getRepuesto().getIdRepuesto();
+        Long idReparacion =
+                detalle.getReparacion().getIdReparacion();
 
-        Reparacion reparacion = reparacionRepository.findById(idReparacion)
+        Long idRepuesto =
+                detalle.getRepuesto().getIdRepuesto();
+
+        Reparacion reparacion = reparacionRepository
+                .findById(idReparacion)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "La reparación con ID " + idReparacion + " no existe"
+                        "La reparacion seleccionada no existe"
                 ));
 
-        // Si es una actualización, devolvemos al inventario
-        // las unidades del detalle anterior.
+        // Recuperar el detalle anterior si estamos actualizando.
         if (detalle.getIdDetalle() != null) {
 
-            DetalleReparacion anterior = repository.findById(
-                    detalle.getIdDetalle()
-            ).orElseThrow(() -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "El detalle de reparación no existe"
-            ));
+            DetalleReparacion anterior = repository
+                    .findById(detalle.getIdDetalle())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "El detalle de reparacion no existe"
+                    ));
 
-            Long idRepuestoAnterior = anterior.getRepuesto().getIdRepuesto();
+            Long idRepuestoAnterior =
+                    anterior.getRepuesto().getIdRepuesto();
 
             Repuesto repuestoAnterior = repuestoRepository
                     .findById(idRepuestoAnterior)
@@ -102,6 +107,7 @@ public class DetalleReparacionService {
             int stockAnterior = repuestoAnterior.getStock() == null
                     ? 0 : repuestoAnterior.getStock();
 
+            // Devolver las unidades del detalle anterior.
             repuestoAnterior.setStock(
                     stockAnterior + anterior.getCantidad()
             );
@@ -109,15 +115,18 @@ public class DetalleReparacionService {
             repuestoRepository.save(repuestoAnterior);
         }
 
-        Repuesto repuesto = repuestoRepository.findById(idRepuesto)
+        // Buscar el repuesto nuevo.
+        Repuesto repuesto = repuestoRepository
+                .findById(idRepuesto)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "El repuesto con ID " + idRepuesto + " no existe"
+                        "El repuesto seleccionado no existe"
                 ));
 
         int stockDisponible = repuesto.getStock() == null
                 ? 0 : repuesto.getStock();
 
+        // Comprobar el inventario disponible.
         if (stockDisponible < detalle.getCantidad()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -125,28 +134,36 @@ public class DetalleReparacionService {
             );
         }
 
-        if (repuesto.getPrecio() == null) {
+        // Comprobar el precio del repuesto.
+        if (repuesto.getPrecio() == null ||
+                repuesto.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "El repuesto no tiene un precio registrado"
+                    "El repuesto debe tener un precio mayor que cero"
             );
         }
 
-        // Descontar las unidades utilizadas.
-        repuesto.setStock(stockDisponible - detalle.getCantidad());
+        // Descontar unidades del inventario.
+        repuesto.setStock(
+                stockDisponible - detalle.getCantidad()
+        );
+
         repuestoRepository.save(repuesto);
 
-        // Asignar las entidades completas.
+        // Asociar las entidades completas.
         detalle.setReparacion(reparacion);
         detalle.setRepuesto(repuesto);
 
-        // Calcular automáticamente los valores.
-        detalle.setPrecioUnitario(repuesto.getPrecio());
+        // Calcular automáticamente el precio y subtotal.
+        BigDecimal precio = repuesto.getPrecio()
+                .setScale(2, RoundingMode.HALF_UP);
 
-        BigDecimal subtotal = repuesto.getPrecio()
+        BigDecimal subtotal = precio
                 .multiply(BigDecimal.valueOf(detalle.getCantidad()))
                 .setScale(2, RoundingMode.HALF_UP);
 
+        detalle.setPrecioUnitario(precio);
         detalle.setSubTotal(subtotal);
 
         return repository.save(detalle);
@@ -158,12 +175,13 @@ public class DetalleReparacionService {
         DetalleReparacion detalle = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "El detalle de reparación no existe"
+                        "El detalle de reparacion no existe"
                 ));
 
         Long idRepuesto = detalle.getRepuesto().getIdRepuesto();
 
-        Repuesto repuesto = repuestoRepository.findById(idRepuesto)
+        Repuesto repuesto = repuestoRepository
+                .findById(idRepuesto)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "El repuesto asociado no existe"
@@ -172,8 +190,9 @@ public class DetalleReparacionService {
         int stockActual = repuesto.getStock() == null
                 ? 0 : repuesto.getStock();
 
-        // Devolver al inventario las unidades del detalle eliminado.
+        // Devolver las unidades al inventario.
         repuesto.setStock(stockActual + detalle.getCantidad());
+
         repuestoRepository.save(repuesto);
 
         repository.delete(detalle);

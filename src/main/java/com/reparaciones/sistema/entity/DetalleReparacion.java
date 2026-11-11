@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Digits;
 
 import java.math.BigDecimal;
 
@@ -22,9 +23,13 @@ public class DetalleReparacion {
     @Column(name = "cantidad")
     private Integer cantidad;
 
+    @Digits(integer = 10, fraction = 2,
+            message = "El precio unitario no tiene un formato valido")
     @Column(name = "precio_unitario", precision = 12, scale = 2)
     private BigDecimal precioUnitario;
 
+    @Digits(integer = 10, fraction = 2,
+            message = "El subtotal no tiene un formato valido")
     @Column(name = "sub_total", precision = 12, scale = 2)
     private BigDecimal subTotal;
 

@@ -1,13 +1,16 @@
 
 package com.reparaciones.sistema.controller;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import com.reparaciones.sistema.entity.Cliente;
 import com.reparaciones.sistema.service.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -20,10 +23,15 @@ public class ClienteController {
     }
 
     @GetMapping
-    public List<Cliente> listar() {
-        return service.listar();
-    }
+public Page<Cliente> listar(
+        @PageableDefault(
+                size = 5,
+                sort = "idCliente",
+                direction = Sort.Direction.DESC
+        ) Pageable pageable) {
 
+    return service.listar(pageable);
+}
     @GetMapping("/{id}")
     public ResponseEntity<Cliente> buscar(@PathVariable Long id) {
         return service.buscarPorId(id)

@@ -5,12 +5,12 @@ import com.reparaciones.sistema.entity.Celular;
 import com.reparaciones.sistema.entity.Cliente;
 import com.reparaciones.sistema.repository.CelularRepository;
 import com.reparaciones.sistema.repository.ClienteRepository;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,9 +26,9 @@ public class CelularService {
         this.clienteRepository = clienteRepository;
     }
 
-    public List<Celular> listar() {
-        return repository.findAll();
-    }
+   public Page<Celular> listar(Pageable pageable) {
+    return repository.findAll(pageable);
+}
 
     public Optional<Celular> buscarPorId(Long id) {
         return repository.findById(id);

@@ -3,12 +3,14 @@ package com.reparaciones.sistema.controller;
 
 import com.reparaciones.sistema.entity.DetalleReparacion;
 import com.reparaciones.sistema.service.DetalleReparacionService;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/detalles-reparacion")
@@ -22,13 +24,19 @@ public class DetalleReparacionController {
     }
 
     @GetMapping
-    public List<DetalleReparacion> listar() {
-        return service.listar();
-    }
+public Page<DetalleReparacion> listar(
+        @PageableDefault(
+                size = 10,
+                sort = "idDetalle",
+                direction = Sort.Direction.DESC
+        ) Pageable pageable) {
+    return service.listar(pageable);
+}
 
     @GetMapping("/{id}")
     public ResponseEntity<DetalleReparacion> buscar(
             @PathVariable Long id) {
+
         return service.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -37,6 +45,7 @@ public class DetalleReparacionController {
     @PostMapping
     public DetalleReparacion crear(
             @Valid @RequestBody DetalleReparacion detalle) {
+
         return service.guardar(detalle);
     }
 
@@ -50,6 +59,7 @@ public class DetalleReparacionController {
         }
 
         detalle.setIdDetalle(id);
+
         return ResponseEntity.ok(service.guardar(detalle));
     }
 
@@ -61,6 +71,7 @@ public class DetalleReparacionController {
         }
 
         service.eliminar(id);
+
         return ResponseEntity.noContent().build();
     }
 }

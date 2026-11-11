@@ -1,15 +1,21 @@
 
 package com.reparaciones.sistema.controller;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import com.reparaciones.sistema.entity.Reparacion;
 import com.reparaciones.sistema.service.ReparacionService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+
+
 
 @RestController
 @RequestMapping("/api/reparaciones")
 public class ReparacionController {
+
     private final ReparacionService service;
 
     public ReparacionController(ReparacionService service) {
@@ -17,28 +23,38 @@ public class ReparacionController {
     }
 
     @GetMapping
-    public List<Reparacion> listar() {
-        return service.listar();
-    }
+public Page<Reparacion> listar(
+        @PageableDefault(
+                size = 5,
+                sort = "idReparacion",
+                direction = Sort.Direction.DESC
+        ) Pageable pageable) {
+    return service.listar(pageable);
+}
 
     @GetMapping("/{id}")
     public ResponseEntity<Reparacion> buscar(@PathVariable Long id) {
-        return service.buscarPorId(id).map(ResponseEntity::ok)
+        return service.buscarPorId(id)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Reparacion crear(@RequestBody Reparacion reparacion) {
+    public Reparacion crear(@Valid @RequestBody Reparacion reparacion) {
         return service.guardar(reparacion);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Reparacion> actualizar(
-            @PathVariable Long id, @RequestBody Reparacion reparacion) {
+            @PathVariable Long id,
+            @Valid @RequestBody Reparacion reparacion) {
+
         if (service.buscarPorId(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
         reparacion.setIdReparacion(id);
+
         return ResponseEntity.ok(service.guardar(reparacion));
     }
 
@@ -47,6 +63,7 @@ public class ReparacionController {
         if (service.buscarPorId(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }

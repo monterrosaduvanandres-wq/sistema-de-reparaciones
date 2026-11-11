@@ -1,7 +1,12 @@
+
 package com.reparaciones.sistema.entity;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,6 +19,7 @@ public class Reparacion {
     @Column(name = "id_reparacion")
     private Long idReparacion;
 
+    @NotNull(message = "La fecha de ingreso es obligatoria")
     @Column(name = "fecha_ingreso")
     private LocalDate fechaIngreso;
 
@@ -23,19 +29,26 @@ public class Reparacion {
     @Column(name = "fecha_entrega")
     private LocalDate fechaEntrega;
 
+    @Size(max = 500, message = "El diagnostico no puede superar 500 caracteres")
     @Column(name = "diagnostico")
     private String diagnostico;
 
+    @NotBlank(message = "El problema reportado es obligatorio")
+    @Size(min = 5, max = 500, message = "El problema reportado debe tener entre 5 y 500 caracteres")
     @Column(name = "problema_reportado")
     private String problemaReportado;
 
+    @NotBlank(message = "El estado es obligatorio")
+    @Size(max = 50, message = "El estado no puede superar 50 caracteres")
     @Column(name = "estado")
     private String estado;
 
+    @NotNull(message = "Debe seleccionar un tecnico")
     @ManyToOne
     @JoinColumn(name = "id_tecnico")
     private Tecnico tecnico;
 
+    @NotNull(message = "Debe seleccionar un celular")
     @JsonBackReference("celular-reparaciones")
     @ManyToOne
     @JoinColumn(name = "id_celular")

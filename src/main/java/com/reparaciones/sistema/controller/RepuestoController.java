@@ -6,8 +6,11 @@ import com.reparaciones.sistema.service.RepuestoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/repuestos")
@@ -18,11 +21,15 @@ public class RepuestoController {
     public RepuestoController(RepuestoService service) {
         this.service = service;
     }
-
-    @GetMapping
-    public List<Repuesto> listar() {
-        return service.listar();
-    }
+@GetMapping
+public Page<Repuesto> listar(
+        @PageableDefault(
+                size = 10,
+                sort = "idRepuesto",
+                direction = Sort.Direction.DESC
+        ) Pageable pageable) {
+    return service.listar(pageable);
+}
 
     @GetMapping("/{id}")
     public ResponseEntity<Repuesto> buscar(@PathVariable Long id) {
